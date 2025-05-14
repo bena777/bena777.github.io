@@ -1,0 +1,98 @@
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f5f7fa;
+    color: #333;
+}
+
+#matrixContainer {
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    overflow-x: auto;
+}
+
+table {
+    border-collapse: collapse;
+    margin: 0 auto;
+}
+
+td {
+    padding: 6px;
+}
+
+input[type="number"],
+input[type="text"] {
+    padding: 6px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 80px;
+    text-align: center;
+}
+
+button {
+    margin: 10px 5px;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: bold;
+    color: white;
+    background-color: #007bff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+#matrix_error {
+    color: red;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+
+#network {
+    width: 100%;
+    height: 500px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #fff;
+    margin-top: 20px;
+    position: relative;
+}
+
+h3 {
+    display: inline-block;
+    margin: 5px 10px;
+    font-size: 18px;
+    color: #007bff;
+}
+
+h2 {
+    font-size: 18px;
+    margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+    input[type="number"],
+    input[type="text"] {
+        width: 60px;
+    }
+
+    table {
+        font-size: 12px;
+    }
+}
