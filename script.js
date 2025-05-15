@@ -3,7 +3,7 @@ class MarkovChain{
         this.names = [];
         this.current = "";
         this.indexs = new Map();
-        this.markov_adj;
+        this.markov_adj =[[]];
     }
 
     init_chain(start,namess, probs){
@@ -48,6 +48,66 @@ class MarkovChain{
         return path;
     }
 
+    find_least_prob_path(start){
+        const S = new Set();
+        const VS = new Set();
+        const d = {};
+        const p = {};
+
+        S.add(start);
+        d[start] = 0;
+        p[start] = " "; 
+        for (const [state, _] of this.indexs.entries()) {
+            if (state !== start) {
+                VS.add(state);
+                d[state] = 9999;
+                p[state] = " ";
+            }
+        }
+
+        for (const v of VS) {
+            p[v] = start;
+            const prob = this.markov_adj[this.indexs.get(start)][this.indexs.get(v)];
+            if (prob > 0.0) {
+                d[v] = prob;
+            } else {
+                d[v] = 9999;
+            }
+        }
+
+        while (VS.size > 0) {
+            let smallest = null;
+            let smallestWeight = 9999;
+
+            for (const v of VS) {
+                if (d[v] < smallestWeight) {
+                    smallest = v;
+                    smallestWeight = d[v];
+                }
+            }
+
+            if (smallest === null) break;
+
+            VS.delete(smallest);
+            S.add(smallest);
+
+            for (const v of VS) {
+                const prob = this.markov_adj[this.indexs.get(smallest)][this.indexs.get(v)];
+                if (prob > 0) {
+                    const alt = d[smallest] * prob;
+                    if (alt < d[v]) {
+                        d[v] = alt;
+                        p[v] = smallest;
+                    }
+                }
+            }
+        }
+
+        console.log("Lowest probability paths for", start);
+        for (const state in p) {
+            console.log(`${state} | ${p[state]} | ${d[state]}`);
+        }
+    }
 }
 
 let markovChain = new MarkovChain();
@@ -79,7 +139,7 @@ async function next_state() {
             id: parseInt(markovChain.indexs.get(markovChain.current)),
             color: "blue"
         })
-        let text = document.getElementById(markovChain.current + "_count");
+        let text = document.getElementById(markovChain.current + "_count"); // need to fix first element of recency list staying in 
         text.textContent = parseInt(text.textContent) + 1;
         let recent_text = "";
         const att =  Math.min(recent.length,10);
@@ -226,6 +286,7 @@ function check_matrix_input(){
         markovChain = new MarkovChain();
         markovChain.init_chain(names[0],names,transition);
         draw_markov_chain(names,transition);
+        markovChain.find_least_prob_path(names[0]);
     }
 }
 
