@@ -27,7 +27,7 @@ class MarkovChain{
         this.markov_adj = probs;
         this.names = namess;
         this.current = start;
-        this.dist.set(start,this.dist.get(start)+1);
+        // this.dist.set(start,this.dist.get(start)+1);
     }
 
     randomChoice(arr, probabilities) {
@@ -111,8 +111,6 @@ class MarkovChain{
         
         let path = [end];
         let curr = end;
-        console.log(p[end]);
-        console.log(p);
         while(p[curr] != " "){
             path.push(p[path.at(-1)])
             curr = p[curr];
@@ -155,15 +153,13 @@ async function next_state() {
             color: "blue"
         })
         let text = document.getElementById(markovChain.current + "_count"); // need to fix first element of recency list staying in 
-        text.textContent = parseInt(text.textContent) + 1;
-        let recent_text = "";
+        text.textContent = parseInt(markovChain.dist.get(markovChain.current));
+        let recent_text = "last 10: ";
         const att =  Math.min(recent.length,10);
-        for(let i = 0; i < att; i++){
+        for(let i = 1; i < att+1; i++){
             recent_text = recent_text + recent.at(-i) + " ";
         }
         recent_nodes.textContent = recent_text;
-        console.log(Array.from(markovChain.dist.keys()));
-        console.log(Array.from(markovChain.dist.values()));
 
         const trace = {
             x: Array.from(markovChain.dist.keys()),
@@ -177,8 +173,7 @@ async function next_state() {
             xaxis: { title: 'State', type: "Category"},
             yaxis: { title: 'Visits' }
         };
-        Plotly.newPlot('histo_plot',[trace],histo,{staticPlot: true});
-        console.log(markovChain.dist);
+        Plotly.newPlot('histo_plot',[trace],histo,{staticPlot: false});
     }
     stop = true;
     data.nodes.update({
@@ -372,6 +367,7 @@ function make_matrix_input() {
     chain_button.id = "chain_button";
     chain_button.addEventListener("click", function() {
         check_matrix_input();
+        recent_nodes.textContent = "";
     });
     container.append(chain_button);
 }
