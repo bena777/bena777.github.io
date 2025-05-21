@@ -4,11 +4,15 @@ class MarkovChain{
         this.current = "";
         this.indexs = new Map();
         this.markov_adj =[[]];
+        this.dist = new Map();
+        this.start;
     }
 
     init_chain(start,namess, probs){
+        this.start = start;
         for(let i=0; i < namess.length; i++){
             this.indexs.set(namess[i], i);
+            this.dist.set(namess[i],0);
         }
         for(let vec of probs){
             let sum = 0;
@@ -23,6 +27,7 @@ class MarkovChain{
         this.markov_adj = probs;
         this.names = namess;
         this.current = start;
+        this.dist.set(start,this.dist.get(start)+1);
     }
 
     randomChoice(arr, probabilities) {
@@ -44,11 +49,12 @@ class MarkovChain{
             let row = this.markov_adj[this.indexs.get(this.current)];
             this.current = this.randomChoice(this.names, row);
             path.push(this.current);
+            this.dist.set(this.current,this.dist.get(this.current)+1);
         }
         return path;
     }
 
-    find_least_prob_path(start){
+    find_least_prob_path(start,end){
         const S = new Set();
         const VS = new Set();
         const d = {};
@@ -102,11 +108,20 @@ class MarkovChain{
                 }
             }
         }
-
-        console.log("Lowest probability paths for", start);
-        for (const state in p) {
-            console.log(`${state} | ${p[state]} | ${d[state]}`);
+        
+        let path = [end];
+        let curr = end;
+        console.log(p[end]);
+        console.log(p);
+        while(p[curr] != " "){
+            path.push(p[path.at(-1)])
+            curr = p[curr];
         }
+        // console.log("Lowest probability paths for", start);
+        // for (const state in p) {
+            // console.log(`${state} | ${p[state]} | ${d[state]}`);
+        // }
+        return path.reverse();
     }
 }
 
@@ -121,6 +136,7 @@ function sleep(ms){
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+
 async function next_state() {
     markovChain.run_nodes(1);
     states = [];
@@ -133,7 +149,6 @@ async function next_state() {
             color: "green"
         })
         recent.push(markovChain.current);
-        console.log(Math.pow(speed,3));
         await sleep(Math.pow(speed,3));
         data.nodes.update({
             id: parseInt(markovChain.indexs.get(markovChain.current)),
@@ -147,7 +162,23 @@ async function next_state() {
             recent_text = recent_text + recent.at(-i) + " ";
         }
         recent_nodes.textContent = recent_text;
+        console.log(Array.from(markovChain.dist.keys()));
+        console.log(Array.from(markovChain.dist.values()));
 
+        const trace = {
+            x: Array.from(markovChain.dist.keys()),
+            y: Array.from(markovChain.dist.values()),
+            type: 'bar'
+        };
+        histo = {
+            title: {
+                text: "Chain Distribution"
+            },
+            xaxis: { title: 'State', type: "Category"},
+            yaxis: { title: 'Visits' }
+        };
+        Plotly.newPlot('histo_plot',[trace],histo,{staticPlot: true});
+        console.log(markovChain.dist);
     }
     stop = true;
     data.nodes.update({
@@ -155,7 +186,6 @@ async function next_state() {
         color: "blue"
     })
 }
-
 
 function draw_markov_chain(names, transition){
     stop = true;
@@ -208,7 +238,7 @@ function draw_markov_chain(names, transition){
         }
     });
 
-container.appendChild(run_button);
+    container.appendChild(run_button);
 
     const least_prob_path_button = document.createElement("button");
     least_prob_path_button.textContent = "find least prob path";
@@ -246,6 +276,18 @@ container.appendChild(run_button);
     recent_nodes.id = "recent_nodes";
     recent_nodes.textContent = "";
     container.appendChild(recent_nodes);
+
+    histo = {
+        x:names,
+        y:[0].flatMap(el => Array(names.size).fill(el)),
+        title: {
+            text: "Chain Distribution"
+        },
+        type: 'histogram',
+        xaxis: { title: 'State' },
+        yaxis: { title: 'Visits' }
+    };
+    Plotly.newPlot('histo_plot',histo);
 }
 
 function check_matrix_input(){
@@ -286,7 +328,7 @@ function check_matrix_input(){
         markovChain = new MarkovChain();
         markovChain.init_chain(names[0],names,transition);
         draw_markov_chain(names,transition);
-        markovChain.find_least_prob_path(names[0]);
+        markovChain.find_least_prob_path(names.at(0),names.at(-1));
     }
 }
 
